@@ -1,0 +1,32 @@
+# CUB-200-2011 Transfer Learning — Sprint 0 Config
+dataset:
+  root: "CUB_200_2011/CUB_200_2011"   # relative to project root
+  num_classes: 200
+  val_fraction: 0.10                   # fraction of train split held out for validation
+  seed: 42
+
+preprocessing:
+  resize_short_edge: 256
+  crop_size: 224
+  imagenet_mean: [0.485, 0.456, 0.406]
+  imagenet_std:  [0.229, 0.224, 0.225]
+
+model:
+  backbone: resnet50
+  pretrained: true
+  freeze_backbone: true   # set false to fine-tune all layers
+
+training:
+  batch_size: 32
+  epochs: 10
+  optimizer: adam
+  lr: 1.0e-3
+  weight_decay: 1.0e-4
+  scheduler: cosine          # cosine annealing over all epochs
+  num_workers: 4
+  checkpoint_dir: checkpoints
+  log_csv: reports/train_log.csv
+
+evaluation:
+  checkpoint: checkpoints/best.pt
+  results_dir: reports
