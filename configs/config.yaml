@@ -1,8 +1,8 @@
-# CUB-200-2011 Transfer Learning — Sprint 0 Config
+# CUB-200-2011 — Sprint 0 Config
 dataset:
-  root: "CUB_200_2011/CUB_200_2011"   # relative to project root
+  root: "CUB_200_2011/CUB_200_2011"
   num_classes: 200
-  val_fraction: 0.10                   # fraction of train split held out for validation
+  val_fraction: 0.10
   seed: 42
 
 preprocessing:
@@ -14,7 +14,7 @@ preprocessing:
 model:
   backbone: resnet50
   pretrained: true
-  freeze_backbone: true   # set false to fine-tune all layers
+  freeze_backbone: true
 
 training:
   batch_size: 32
@@ -22,11 +22,50 @@ training:
   optimizer: adam
   lr: 1.0e-3
   weight_decay: 1.0e-4
-  scheduler: cosine          # cosine annealing over all epochs
+  scheduler: cosine
   num_workers: 4
-  checkpoint_dir: checkpoints
-  log_csv: reports/train_log.csv
+  checkpoint_dir: checkpoints/baseline
+  log_csv: reports/exp_baseline/train_log.csv
 
 evaluation:
-  checkpoint: checkpoints/best.pt
-  results_dir: reports
+  checkpoint: checkpoints/baseline/best.pt
+  results_dir: reports/exp_baseline
+
+# ── Encoder-Decoder (Denoising Autoencoder) ──────────────────────────────────
+ae_training:
+  emb_dims: [512, 256]          # trained separately; PCA uses raw 2048-d features
+  epochs: 20
+  lr_backbone: 1.0e-4           # fine-tune ResNet layers
+  lr_head: 1.0e-3               # projection head + decoder
+  weight_decay: 1.0e-4
+  batch_size: 32
+  noise_std: 0.05               # Gaussian noise σ added to input
+  num_workers: 4
+  checkpoint_dir: checkpoints   # saves as checkpoints/ae_<dim>/best.pt
+
+ae_augmentation:
+  jitter_brightness: 0.3
+  jitter_contrast: 0.3
+  jitter_saturation: 0.3
+  jitter_hue: 0.1
+  rotation_degrees: 10.0
+
+# ── MLP Classifier on frozen embeddings ──────────────────────────────────────
+mlp_training:
+  hidden_dims: [512]
+  dropout: 0.3
+  epochs: 30
+  lr: 1.0e-3
+  weight_decay: 1.0e-4
+  batch_size: 256
+  num_workers: 0
+  scheduler: cosine
+  checkpoint_dir: checkpoints   # saves as checkpoints/mlp_<tag>/best.pt
+  log_dir: reports              # logs to reports/exp_mlp_<tag>/train_log.csv
+
+# ── PCA ───────────────────────────────────────────────────────────────────────
+pca:
+  variance_threshold: 0.95
+  source_dim: 512               # which trained AE backbone to use for raw features
+
+embeddings_dir: embeddings

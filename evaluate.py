@@ -2,8 +2,7 @@
 evaluate.py — Loads best checkpoint, evaluates on the official CUB-200 test set.
 
 Usage:
-    python evaluate.py                         # uses configs/config.yaml
-    python evaluate.py --config configs/config.yaml
+    python evaluate.py
 """
 
 import argparse
@@ -56,19 +55,17 @@ def main():
     if os.name == "nt":
         cfg["training"]["num_workers"] = 0
 
+    results_dir = Path("reports/exp_baseline")
+    results_dir.mkdir(parents=True, exist_ok=True)
+    ckpt_path   = Path("checkpoints/baseline/best.pt")
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
-
-    results_dir = Path(cfg["evaluation"]["results_dir"])
-    results_dir.mkdir(parents=True, exist_ok=True)
-
-    # ── load checkpoint ──
-    ckpt_path = Path(cfg["evaluation"]["checkpoint"])
     assert ckpt_path.exists(), f"Checkpoint not found: {ckpt_path}"
     ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
     print(f"Loaded checkpoint from epoch {ckpt['epoch']} (val_acc={ckpt['val_acc']:.2f}%)")
 
-    model = build_model(cfg).to(device)
+    model = build_model(cfg, technique).to(device)
     model.load_state_dict(ckpt["state_dict"])
     model.eval()
 
@@ -206,6 +203,7 @@ def main():
     # ── summary ──
     summary_path = results_dir / "eval_summary.txt"
     with open(summary_path, "w") as f:
+        f.write(f"Technique: baseline\n")
         f.write(f"Top-1 Accuracy: {top1_acc:.2f}%\n")
         f.write(f"Top-5 Accuracy: {top5_acc:.2f}%\n")
         f.write(f"Checkpoint epoch: {ckpt['epoch']}\n")

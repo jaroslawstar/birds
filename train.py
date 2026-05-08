@@ -1,9 +1,9 @@
 """
-train.py — Sprint 0 training loop for CUB-200 linear-probe baseline.
+train.py — CUB-200 linear-probe training loop (ResNet-50 frozen backbone).
 
 Usage:
-    python train.py                         # uses configs/config.yaml
-    python train.py --config configs/config.yaml --epochs 5
+    python train.py
+    python train.py --smoke-test   # 1 epoch sanity check
 """
 
 import argparse
@@ -86,6 +86,10 @@ def main():
         print("[smoke-test] Overriding epochs=1")
     elif args.epochs is not None:
         cfg["training"]["epochs"] = args.epochs
+
+    # ── per-experiment output paths ──
+    cfg["training"]["checkpoint_dir"] = "checkpoints/baseline"
+    cfg["training"]["log_csv"]        = "reports/exp_baseline/train_log.csv"
 
     # ── device ──
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
