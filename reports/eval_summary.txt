@@ -1,0 +1,3 @@
+Top-1 Accuracy: 63.57%
+Top-5 Accuracy: 89.13%
+Checkpoint epoch: 10
