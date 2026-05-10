@@ -57,7 +57,7 @@ def main():
 
     results_dir = Path("reports/exp_baseline")
     results_dir.mkdir(parents=True, exist_ok=True)
-    ckpt_path   = Path("checkpoints/baseline/best.pt")
+    ckpt_path   = Path("checkpoints/best.pt")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
