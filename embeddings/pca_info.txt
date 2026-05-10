@@ -1,0 +1,4 @@
+n_components: 448
+explained_variance: 95.0093%
+source_encoder: ae_512
+variance_threshold: 0.95
