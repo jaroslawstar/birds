@@ -84,27 +84,37 @@ def main():
 
     py = sys.executable
 
-    # ── Stage 1 & 2: Train AE (sequential — GPU memory) ──
+    # ── Stage 1 & 2: Train AE with augmentation (sequential — GPU memory) ──
     if not args.skip_ae:
         for dim in [512, 256]:
             cmd = [py, "train_ae.py", "--dim", str(dim)]
             if args.smoke_test:
                 cmd.append("--smoke-test")
             run(cmd,
-                label=f"AE training  dim={dim}",
+                label=f"AE training  dim={dim}  aug",
                 log_path=Path(f"reports/exp_ae_{dim}/run_train.log"))
+
+        # ── Stage 2b: Train AE without augmentation (for comparison) ──
+        for dim in [512, 256]:
+            cmd = [py, "train_ae.py", "--dim", str(dim), "--no-aug"]
+            if args.smoke_test:
+                cmd.append("--smoke-test")
+            run(cmd,
+                label=f"AE training  dim={dim}  noaug",
+                log_path=Path(f"reports/exp_ae_{dim}_noaug/run_train.log"))
 
     # ── Stage 3: Extract embeddings ──
     if not args.skip_emb:
         run([py, "extract_embeddings.py"],
-            label="Extract embeddings (512, 256, PCA)",
+            label="Extract embeddings (512, 256, noaug variants, PCA)",
             log_path=Path("reports/extract_embeddings.log"))
 
-    # ── Stage 4: Train MLPs in parallel (CPU-bound, no GPU contention) ──
+    # ── Stage 4: Train MLPs in parallel ──
+    all_tags = ["512", "256", "pca", "512_noaug", "256_noaug"]
     print("\n=== Training MLPs in parallel ===")
     run_parallel(
         [([py, "train_mlp.py", "--emb", tag], f"MLP {tag}")
-         for tag in ["512", "256", "pca"]],
+         for tag in all_tags],
         log_dir=Path("reports"),
     )
 

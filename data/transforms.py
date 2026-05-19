@@ -47,7 +47,7 @@ class AETransformPair:
     For val/test (split != 'train'): deterministic center crop, same noise.
     """
 
-    def __init__(self, cfg, split: str):
+    def __init__(self, cfg, split: str, augment: bool = True):
         ae_aug  = cfg["ae_augmentation"]
         pre     = cfg["preprocessing"]
         self.mean      = pre["imagenet_mean"]
@@ -56,6 +56,7 @@ class AETransformPair:
         self.crop_size = pre["crop_size"]
         self.noise_std = cfg["ae_training"]["noise_std"]
         self.split     = split
+        self.augment   = augment
 
         self.jitter = transforms.ColorJitter(
             brightness=ae_aug["jitter_brightness"],
@@ -91,12 +92,16 @@ class AETransformPair:
         clean = self._to_tensor_normalized(img)
 
         # ── Step 3: noisy input (ColorJitter + Gaussian noise) ──
-        noisy_pil = self.jitter(img) if self.split == "train" else img
+        if self.augment and self.split == "train":
+            noisy_pil = self.jitter(img)
+        else:
+            noisy_pil = img
         noisy = self._to_tensor_normalized(noisy_pil)
-        noisy = noisy + torch.randn_like(noisy) * self.noise_std
+        if self.augment:
+            noisy = noisy + torch.randn_like(noisy) * self.noise_std
 
         return noisy, clean
 
 
-def get_ae_transforms(cfg, split: str) -> AETransformPair:
-    return AETransformPair(cfg, split)
+def get_ae_transforms(cfg, split: str, augment: bool = True) -> AETransformPair:
+    return AETransformPair(cfg, split, augment=augment)

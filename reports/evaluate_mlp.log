@@ -1,5 +1,5 @@
-[mlp_512]  Top-1: 19.04%   Top-5: 46.43%
-[mlp_256]  Top-1: 38.07%   Top-5: 69.95%
-[mlp_pca]  Top-1: 59.63%   Top-5: 86.14%
+[mlp_512]  Top-1: 59.48%   Top-5: 86.42%
+[mlp_256]  Top-1: 58.82%   Top-5: 85.64%
+[mlp_pca]  Top-1: 59.98%   Top-5: 86.16%
 
 Comparison report: reports\ae_comparison.md

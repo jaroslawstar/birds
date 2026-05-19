@@ -125,39 +125,45 @@ def evaluate_one(tag: str, cfg: dict, device) -> dict:
 
 
 def write_comparison(results: list[dict], cfg: dict):
-    """Write reports/ae_comparison.md comparing all three MLP variants."""
+    """Write reports/ae_comparison.md with aug vs noaug comparison."""
     emb_dir = Path(cfg["embeddings_dir"])
-    pca_info_path = emb_dir / "pca_info.txt"
     pca_note = ""
+    pca_info_path = emb_dir / "pca_info.txt"
     if pca_info_path.exists():
         pca_note = pca_info_path.read_text()
+
+    by_tag = {r["tag"]: r for r in results}
 
     lines = [
         "# Encoder-Decoder Embedding Comparison — CUB-200",
         "",
-        "Architecture: ResNet-50 (fine-tuned) → projection head → decoder (denoising AE).",
+        "Joint loss: alpha*MSE + (1-alpha)*CrossEntropy  |  "
         "MLP classifier trained on frozen embeddings for 30 epochs.",
         "",
         "## Results",
         "",
-        "| Embedding | Dim | Top-1 (%) | Top-5 (%) | Best Epoch |",
-        "|-----------|-----|-----------|-----------|------------|",
+        "| Embedding      | Augmented | Dim | Top-1 (%) | Top-5 (%) | Best Epoch |",
+        "|----------------|-----------|-----|-----------|-----------|------------|",
     ]
-    for r in results:
-        lines.append(f"| {r['tag']:<9} | {r['in_dim']:>3} | "
-                     f"{r['top1']:>9.2f} | {r['top5']:>9.2f} | "
-                     f"{r['epoch']:>10} |")
+    order = ["512", "512_noaug", "256", "256_noaug", "pca"]
+    for tag in order:
+        if tag not in by_tag:
+            continue
+        r   = by_tag[tag]
+        aug = "No" if tag.endswith("_noaug") else ("—" if tag == "pca" else "Yes")
+        lines.append(f"| {tag:<14} | {aug:<9} | {r['in_dim']:>3} | "
+                     f"{r['top1']:>9.2f} | {r['top5']:>9.2f} | {r['epoch']:>10} |")
 
-    if len(results) > 1:
-        lines += ["", "## Delta vs 512-d baseline"]
-        base = next((r for r in results if r["tag"] == "512"), None)
-        if base:
-            lines += ["", "| Embedding | Delta Top-1 | Delta Top-5 |",
-                         "|-----------|-------------|-------------|"]
-            for r in results:
-                if r["tag"] != "512":
-                    lines.append(f"| {r['tag']:<9} | {r['top1']-base['top1']:+.2f}        "
-                                  f"| {r['top5']-base['top5']:+.2f}        |")
+    # Aug vs noaug delta table
+    lines += ["", "## Augmentation Effect (aug − noaug)","",
+              "| Dim | Delta Top-1 | Delta Top-5 |",
+              "|-----|-------------|-------------|"]
+    for dim in ["512", "256"]:
+        aug_r   = by_tag.get(dim)
+        noaug_r = by_tag.get(f"{dim}_noaug")
+        if aug_r and noaug_r:
+            lines.append(f"| {dim} | {aug_r['top1']-noaug_r['top1']:+.2f}        "
+                         f"| {aug_r['top5']-noaug_r['top5']:+.2f}        |")
 
     if pca_note:
         lines += ["", "## PCA Details", "", "```", pca_note.strip(), "```"]
@@ -166,8 +172,7 @@ def write_comparison(results: list[dict], cfg: dict):
         "", "## Per-experiment artifacts",
         "",
         "Each variant writes to `reports/exp_mlp_<tag>/`:",
-        "- `train_log.csv`, `per_class_accuracy.csv`, `confusion_matrix.png`, "
-          "`eval_summary.txt`",
+        "- `train_log.csv`, `per_class_accuracy.csv`, `confusion_matrix.png`, `eval_summary.txt`",
     ]
 
     out = Path("reports/ae_comparison.md")
@@ -188,7 +193,8 @@ def main():
         cfg = yaml.safe_load(f)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tags   = ["512", "256", "pca"] if args.all else [args.emb]
+    all_tags = ["512", "256", "pca", "512_noaug", "256_noaug"]
+    tags     = all_tags if args.all else [args.emb]
 
     results = [evaluate_one(tag, cfg, device) for tag in tags]
     if args.all:

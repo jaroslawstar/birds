@@ -7,22 +7,22 @@ MLP classifier trained on frozen embeddings for 30 epochs.
 
 | Embedding | Dim | Top-1 (%) | Top-5 (%) | Best Epoch |
 |-----------|-----|-----------|-----------|------------|
-| 512       | 512 |     19.04 |     46.43 |         26 |
-| 256       | 256 |     38.07 |     69.95 |         30 |
-| pca       | 448 |     59.63 |     86.14 |         18 |
+| 512       | 512 |     59.48 |     86.42 |         19 |
+| 256       | 256 |     58.82 |     85.64 |         15 |
+| pca       | 446 |     59.98 |     86.16 |         22 |
 
 ## Delta vs 512-d baseline
 
 | Embedding | Delta Top-1 | Delta Top-5 |
 |-----------|-------------|-------------|
-| 256       | +19.04        | +23.52        |
-| pca       | +40.59        | +39.71        |
+| 256       | -0.66        | -0.78        |
+| pca       | +0.50        | -0.26        |
 
 ## PCA Details
 
 ```
-n_components: 448
-explained_variance: 95.0093%
+n_components: 446
+explained_variance: 95.0068%
 source_encoder: ae_512
 variance_threshold: 0.95
 ```

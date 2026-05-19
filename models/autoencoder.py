@@ -71,18 +71,28 @@ class Decoder(nn.Module):
 
 
 class AutoEncoder(nn.Module):
-    """Full denoising AE: noisy image → encoder → emb → decoder → clean image."""
+    """
+    Denoising AE with optional joint classification branch.
 
-    def __init__(self, emb_dim: int, pretrained: bool = True, freeze_backbone: bool = True):
+    When num_classes is given, forward() returns (recon, emb, logits) and
+    the model can be trained with alpha*MSE + (1-alpha)*CrossEntropy.
+    When num_classes is None the classifier is absent and forward() returns
+    (recon, emb, None) for reconstruction-only use.
+    """
+
+    def __init__(self, emb_dim: int, pretrained: bool = True,
+                 freeze_backbone: bool = True, num_classes: int = None):
         super().__init__()
-        self.encoder = Encoder(emb_dim, pretrained, freeze_backbone)
-        self.decoder = Decoder(emb_dim)
-        self.emb_dim = emb_dim
+        self.encoder    = Encoder(emb_dim, pretrained, freeze_backbone)
+        self.decoder    = Decoder(emb_dim)
+        self.classifier = nn.Linear(emb_dim, num_classes) if num_classes else None
+        self.emb_dim    = emb_dim
 
     def forward(self, x: torch.Tensor):
-        emb   = self.encoder(x)
-        recon = self.decoder(emb)
-        return recon, emb
+        emb     = self.encoder(x)
+        recon   = self.decoder(emb)
+        logits  = self.classifier(emb) if self.classifier is not None else None
+        return recon, emb, logits
 
     def encode(self, x: torch.Tensor) -> torch.Tensor:
         return self.encoder(x)

@@ -26,10 +26,10 @@ def get_loaders(cfg):
     )
 
 
-def get_ae_loaders(cfg):
+def get_ae_loaders(cfg, augment: bool = True):
     """
     AE loaders returning ((noisy, clean), label) per sample.
-    DataLoader's default collate produces ((B_noisy, B_clean), B_labels).
+    augment=False disables ColorJitter and Gaussian noise (standard AE, no denoising).
     """
     root         = cfg["dataset"]["root"]
     val_fraction = cfg["dataset"]["val_fraction"]
@@ -38,9 +38,9 @@ def get_ae_loaders(cfg):
     num_workers  = cfg["ae_training"]["num_workers"]
 
     train_ds = CUBDataset(root, "train", val_fraction, seed,
-                          get_ae_transforms(cfg, "train"))
+                          get_ae_transforms(cfg, "train", augment=augment))
     val_ds   = CUBDataset(root, "val",   val_fraction, seed,
-                          get_ae_transforms(cfg, "val"))
+                          get_ae_transforms(cfg, "val",   augment=augment))
 
     kw = dict(num_workers=num_workers, pin_memory=True)
     return (

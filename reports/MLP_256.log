@@ -1,54 +1,42 @@
 [mlp_256] device=cuda
   Embedding dim: 256  |  Train: 5394  Val: 600
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:   5%|4         | 1/22 [00:00<00:15,  1.40it/s]train:  73%|#######2  | 16/22 [00:00<00:00, 25.99it/s]                                                      val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 01/30  loss=5.1048  train_acc=2.78%  val_acc=5.50%  (1s)
-  [best] val_acc=5.50%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  59%|#####9    | 13/22 [00:00<00:00, 125.27it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 02/30  loss=4.4533  train_acc=8.57%  val_acc=7.50%  (0s)
-  [best] val_acc=7.50%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  64%|######3   | 14/22 [00:00<00:00, 136.85it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 03/30  loss=4.0674  train_acc=13.87%  val_acc=12.50%  (0s)
-  [best] val_acc=12.50%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  73%|#######2  | 16/22 [00:00<00:00, 156.97it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 04/30  loss=3.7457  train_acc=18.80%  val_acc=17.00%  (0s)
-  [best] val_acc=17.00%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  64%|######3   | 14/22 [00:00<00:00, 133.22it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 05/30  loss=3.4793  train_acc=23.49%  val_acc=18.00%  (0s)
-  [best] val_acc=18.00%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  68%|######8   | 15/22 [00:00<00:00, 145.85it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 06/30  loss=3.2045  train_acc=28.42%  val_acc=20.33%  (0s)
-  [best] val_acc=20.33%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  82%|########1 | 18/22 [00:00<00:00, 173.81it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 07/30  loss=2.9603  train_acc=33.70%  val_acc=24.50%  (0s)
-  [best] val_acc=24.50%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  59%|#####9    | 13/22 [00:00<00:00, 125.82it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 08/30  loss=2.7747  train_acc=37.28%  val_acc=25.17%  (0s)
-  [best] val_acc=25.17%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  77%|#######7  | 17/22 [00:00<00:00, 163.67it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 09/30  loss=2.5814  train_acc=40.77%  val_acc=27.50%  (0s)
-  [best] val_acc=27.50%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  91%|######### | 20/22 [00:00<00:00, 198.45it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 10/30  loss=2.4076  train_acc=44.36%  val_acc=30.17%  (0s)
-  [best] val_acc=30.17%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  64%|######3   | 14/22 [00:00<00:00, 139.84it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 11/30  loss=2.2810  train_acc=46.35%  val_acc=30.50%  (0s)
-  [best] val_acc=30.50%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  68%|######8   | 15/22 [00:00<00:00, 141.89it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 12/30  loss=2.1371  train_acc=50.02%  val_acc=31.67%  (0s)
-  [best] val_acc=31.67%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  64%|######3   | 14/22 [00:00<00:00, 139.02it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 13/30  loss=2.0319  train_acc=51.84%  val_acc=34.50%  (0s)
-  [best] val_acc=34.50%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  82%|########1 | 18/22 [00:00<00:00, 161.78it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 14/30  loss=1.9789  train_acc=53.19%  val_acc=35.50%  (0s)
-  [best] val_acc=35.50%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  91%|######### | 20/22 [00:00<00:00, 193.42it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 15/30  loss=1.8623  train_acc=56.03%  val_acc=34.50%  (0s)
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  82%|########1 | 18/22 [00:00<00:00, 174.89it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 16/30  loss=1.7692  train_acc=58.06%  val_acc=34.67%  (0s)
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  68%|######8   | 15/22 [00:00<00:00, 148.37it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 17/30  loss=1.6961  train_acc=60.01%  val_acc=38.17%  (0s)
-  [best] val_acc=38.17%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  59%|#####9    | 13/22 [00:00<00:00, 129.41it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 18/30  loss=1.6455  train_acc=61.40%  val_acc=36.67%  (0s)
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  64%|######3   | 14/22 [00:00<00:00, 138.97it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 19/30  loss=1.5697  train_acc=62.70%  val_acc=38.67%  (0s)
-  [best] val_acc=38.67%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  68%|######8   | 15/22 [00:00<00:00, 137.83it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 20/30  loss=1.5250  train_acc=64.70%  val_acc=37.67%  (0s)
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  64%|######3   | 14/22 [00:00<00:00, 139.77it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 21/30  loss=1.4946  train_acc=65.00%  val_acc=38.83%  (0s)
-  [best] val_acc=38.83%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  68%|######8   | 15/22 [00:00<00:00, 144.27it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 22/30  loss=1.4458  train_acc=66.91%  val_acc=39.00%  (0s)
-  [best] val_acc=39.00%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  73%|#######2  | 16/22 [00:00<00:00, 150.83it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 23/30  loss=1.4105  train_acc=67.59%  val_acc=39.67%  (0s)
-  [best] val_acc=39.67%
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  77%|#######7  | 17/22 [00:00<00:00, 166.79it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 24/30  loss=1.3731  train_acc=68.28%  val_acc=39.50%  (0s)
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  77%|#######7  | 17/22 [00:00<00:00, 167.83it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 25/30  loss=1.3491  train_acc=69.39%  val_acc=39.33%  (0s)
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  86%|########6 | 19/22 [00:00<00:00, 187.02it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 26/30  loss=1.3363  train_acc=69.13%  val_acc=39.33%  (0s)
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  68%|######8   | 15/22 [00:00<00:00, 142.97it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 27/30  loss=1.3214  train_acc=70.39%  val_acc=39.33%  (0s)
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  36%|###6      | 8/22 [00:00<00:00, 64.03it/s]train:  68%|######8   | 15/22 [00:00<00:00, 45.68it/s]train:  95%|#########5| 21/22 [00:00<00:00, 45.26it/s]                                                      val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 28/30  loss=1.3210  train_acc=70.67%  val_acc=39.50%  (1s)
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:   9%|9         | 2/22 [00:00<00:01, 19.01it/s]train:  45%|####5     | 10/22 [00:00<00:00, 48.08it/s]train:  68%|######8   | 15/22 [00:00<00:00, 34.89it/s]                                                      val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 29/30  loss=1.3102  train_acc=70.23%  val_acc=38.83%  (1s)
-train:   0%|          | 0/22 [00:00<?, ?it/s]train:  64%|######3   | 14/22 [00:00<00:00, 132.45it/s]                                                       val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 30/30  loss=1.3064  train_acc=71.08%  val_acc=39.83%  (0s)
-  [best] val_acc=39.83%
+train:   0%|          | 0/22 [00:00<?, ?it/s]train:   5%|4         | 1/22 [00:00<00:08,  2.41it/s]                                                     val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 01/30  loss=4.2809  train_acc=19.52%  val_acc=42.67%  (1s)
+  [best] val_acc=42.67%
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 02/30  loss=2.5441  train_acc=57.88%  val_acc=53.67%  (0s)
+  [best] val_acc=53.67%
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 03/30  loss=1.7746  train_acc=70.99%  val_acc=56.00%  (0s)
+  [best] val_acc=56.00%
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 04/30  loss=1.3600  train_acc=76.64%  val_acc=56.83%  (0s)
+  [best] val_acc=56.83%
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 05/30  loss=1.1077  train_acc=80.27%  val_acc=57.17%  (0s)
+  [best] val_acc=57.17%
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 06/30  loss=0.9304  train_acc=83.00%  val_acc=56.67%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 07/30  loss=0.8146  train_acc=84.82%  val_acc=57.33%  (0s)
+  [best] val_acc=57.33%
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 08/30  loss=0.7254  train_acc=85.78%  val_acc=58.00%  (0s)
+  [best] val_acc=58.00%
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 09/30  loss=0.6415  train_acc=88.30%  val_acc=56.50%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 10/30  loss=0.5885  train_acc=88.78%  val_acc=56.67%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 11/30  loss=0.5442  train_acc=90.10%  val_acc=56.67%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 12/30  loss=0.4985  train_acc=90.84%  val_acc=57.00%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 13/30  loss=0.4549  train_acc=92.79%  val_acc=56.83%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 14/30  loss=0.4336  train_acc=92.34%  val_acc=57.17%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 15/30  loss=0.4134  train_acc=92.70%  val_acc=58.83%  (0s)
+  [best] val_acc=58.83%
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 16/30  loss=0.3756  train_acc=94.10%  val_acc=57.17%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 17/30  loss=0.3582  train_acc=94.38%  val_acc=56.67%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 18/30  loss=0.3382  train_acc=94.81%  val_acc=57.50%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 19/30  loss=0.3237  train_acc=95.25%  val_acc=57.33%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 20/30  loss=0.3153  train_acc=95.38%  val_acc=57.33%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 21/30  loss=0.3031  train_acc=95.53%  val_acc=56.83%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 22/30  loss=0.2971  train_acc=95.83%  val_acc=57.33%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 23/30  loss=0.2876  train_acc=96.01%  val_acc=56.67%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 24/30  loss=0.2757  train_acc=96.92%  val_acc=57.33%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 25/30  loss=0.2716  train_acc=96.64%  val_acc=57.00%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 26/30  loss=0.2703  train_acc=96.89%  val_acc=56.67%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 27/30  loss=0.2735  train_acc=96.55%  val_acc=57.67%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 28/30  loss=0.2668  train_acc=96.92%  val_acc=56.83%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 29/30  loss=0.2637  train_acc=97.26%  val_acc=57.17%  (0s)
+train:   0%|          | 0/22 [00:00<?, ?it/s]                                             val  :   0%|          | 0/3 [00:00<?, ?it/s]                                            [mlp_256] Epoch 30/30  loss=0.2607  train_acc=96.81%  val_acc=57.17%  (0s)
 
-[mlp_256] Best val_acc=39.83%
+[mlp_256] Best val_acc=58.83%

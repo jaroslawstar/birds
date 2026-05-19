@@ -47,15 +47,19 @@ def extract(model: AutoEncoder, loader, device, mode: str) -> np.ndarray:
     return np.concatenate(vecs), np.concatenate(labs)
 
 
-def load_ae(cfg, dim: int, device):
-    ckpt_path = Path(cfg["ae_training"]["checkpoint_dir"]) / f"ae_{dim}" / "best.pt"
+def load_ae(cfg, dim: int, device, suffix: str = ""):
+    tag       = f"ae_{dim}{suffix}"
+    ckpt_path = Path(cfg["ae_training"]["checkpoint_dir"]) / tag / "best.pt"
     assert ckpt_path.exists(), f"Missing checkpoint: {ckpt_path}. Run train_ae.py first."
-    ckpt  = torch.load(ckpt_path, map_location=device, weights_only=False)
-    model = AutoEncoder(emb_dim=dim, pretrained=False).to(device)
+    ckpt        = torch.load(ckpt_path, map_location=device, weights_only=False)
+    num_classes = ckpt.get("num_classes", None)
+    model = AutoEncoder(emb_dim=dim, pretrained=False,
+                        num_classes=num_classes).to(device)
     model.load_state_dict(ckpt["state_dict"])
     model.eval()
-    print(f"Loaded ae_{dim} checkpoint (epoch {ckpt['epoch']}, "
-          f"val_loss={ckpt['val_loss']:.5f})")
+    val_acc_str = f"  val_acc={ckpt['val_acc']:.2f}%" if "val_acc" in ckpt else ""
+    print(f"Loaded {tag} checkpoint (epoch {ckpt['epoch']}, "
+          f"val_loss={ckpt['val_loss']:.5f}{val_acc_str})")
     return model
 
 
@@ -76,23 +80,29 @@ def main():
     train_loader, val_loader, test_loader = get_embed_loaders(cfg)
     loaders = {"train": train_loader, "val": val_loader, "test": test_loader}
 
-    # ── 512-d and 256-d learned embeddings ──
+    # ── aug and noaug learned embeddings for each dim ──
     for dim in cfg["ae_training"]["emb_dims"]:
-        print(f"\n=== Extracting {dim}-d embeddings ===")
-        model = load_ae(cfg, dim, device)
-        for split, loader in loaders.items():
-            vecs, labs = extract(model, loader, device, mode="projected")
-            np.save(emb_dir / f"{split}_{dim}.npy", vecs)
-            # Save labels once (same for all embedding types)
-            lab_path = emb_dir / f"{split}_labels.npy"
-            if not lab_path.exists():
-                np.save(lab_path, labs)
-        print(f"  Saved {dim}-d embeddings to {emb_dir}/")
+        for suffix in ["", "_noaug"]:
+            ckpt_tag  = f"ae_{dim}{suffix}"
+            emb_tag   = f"{dim}{suffix}"
+            ckpt_path = Path(cfg["ae_training"]["checkpoint_dir"]) / ckpt_tag / "best.pt"
+            if not ckpt_path.exists():
+                print(f"  Skipping {ckpt_tag} (no checkpoint found)")
+                continue
+            print(f"\n=== Extracting {emb_tag} embeddings ===")
+            model = load_ae(cfg, dim, device, suffix=suffix)
+            for split, loader in loaders.items():
+                vecs, labs = extract(model, loader, device, mode="projected")
+                np.save(emb_dir / f"{split}_{emb_tag}.npy", vecs)
+                lab_path = emb_dir / f"{split}_labels.npy"
+                if not lab_path.exists():
+                    np.save(lab_path, labs)
+            print(f"  Saved {emb_tag} embeddings to {emb_dir}/")
 
-    # ── 2048-d raw features for PCA (uses ae_512 backbone) ──
+    # ── 2048-d raw features for PCA (frozen backbone; aug/noaug gives identical features) ──
     src_dim = cfg["pca"]["source_dim"]
     print(f"\n=== Extracting 2048-d raw features for PCA (from ae_{src_dim}) ===")
-    model = load_ae(cfg, src_dim, device)
+    model = load_ae(cfg, src_dim, device, suffix="")
     raw = {}
     for split, loader in loaders.items():
         vecs, _ = extract(model, loader, device, mode="raw")
