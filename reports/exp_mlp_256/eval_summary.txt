@@ -1,5 +1,5 @@
 Embedding: 256
 Embedding dim: 256
-Top-1 Accuracy: 58.82%
-Top-5 Accuracy: 85.64%
-Checkpoint epoch: 15
+Top-1 Accuracy: 58.11%
+Top-5 Accuracy: 86.38%
+Checkpoint epoch: 5

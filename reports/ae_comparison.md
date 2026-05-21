@@ -1,22 +1,23 @@
 # Encoder-Decoder Embedding Comparison — CUB-200
 
-Architecture: ResNet-50 (fine-tuned) → projection head → decoder (denoising AE).
-MLP classifier trained on frozen embeddings for 30 epochs.
+Joint loss: alpha*MSE + (1-alpha)*CrossEntropy  |  MLP classifier trained on frozen embeddings for 30 epochs.
 
 ## Results
 
-| Embedding | Dim | Top-1 (%) | Top-5 (%) | Best Epoch |
-|-----------|-----|-----------|-----------|------------|
-| 512       | 512 |     59.48 |     86.42 |         19 |
-| 256       | 256 |     58.82 |     85.64 |         15 |
-| pca       | 446 |     59.98 |     86.16 |         22 |
+| Embedding      | Augmented | Dim | Top-1 (%) | Top-5 (%) | Best Epoch |
+|----------------|-----------|-----|-----------|-----------|------------|
+| 512            | Yes       | 512 |     59.58 |     85.90 |         28 |
+| 512_noaug      | No        | 512 |     62.29 |     88.45 |          6 |
+| 256            | Yes       | 256 |     58.11 |     86.38 |          5 |
+| 256_noaug      | No        | 256 |     60.75 |     87.54 |          7 |
+| pca            | —         | 446 |     59.73 |     86.83 |         16 |
 
-## Delta vs 512-d baseline
+## Augmentation Effect (aug − noaug)
 
-| Embedding | Delta Top-1 | Delta Top-5 |
-|-----------|-------------|-------------|
-| 256       | -0.66        | -0.78        |
-| pca       | +0.50        | -0.26        |
+| Dim | Delta Top-1 | Delta Top-5 |
+|-----|-------------|-------------|
+| 512 | -2.71        | -2.55        |
+| 256 | -2.64        | -1.16        |
 
 ## PCA Details
 

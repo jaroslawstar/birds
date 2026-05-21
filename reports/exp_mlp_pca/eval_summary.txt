@@ -1,5 +1,5 @@
 Embedding: pca
 Embedding dim: 446
-Top-1 Accuracy: 59.98%
-Top-5 Accuracy: 86.16%
-Checkpoint epoch: 22
+Top-1 Accuracy: 59.73%
+Top-5 Accuracy: 86.83%
+Checkpoint epoch: 16
