@@ -1,5 +1,5 @@
 """
-train_ae.py — Autoencoder training for CUB-200.
+train_ae.py -- Autoencoder training for CUB-200.
 
 Joint loss: alpha * MSE(reconstruction) + (1 - alpha) * CrossEntropy(classification)
 
@@ -24,8 +24,6 @@ from tqdm import tqdm
 from data import get_ae_loaders
 from models import AutoEncoder, get_ae_param_groups
 
-
-# ── helpers ──────────────────────────────────────────────────────────────────
 
 def run_epoch(model, loader, mse_crit, ce_crit, alpha, optimizer, device, train: bool):
     model.train() if train else model.eval()
@@ -62,15 +60,13 @@ def run_epoch(model, loader, mse_crit, ce_crit, alpha, optimizer, device, train:
             total_correct / total_n * 100)
 
 
-# ── main ─────────────────────────────────────────────────────────────────────
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/config.yaml")
     parser.add_argument("--dim",    type=int, required=True,
                         help="Embedding dimension (256 or 512)")
     parser.add_argument("--no-aug", action="store_true",
-                        help="Disable ColorJitter and Gaussian noise (standard AE)")
+                        help="Disable ColorJitter and Gaussian noise")
     parser.add_argument("--smoke-test", action="store_true")
     args = parser.parse_args()
 
@@ -94,11 +90,9 @@ def main():
     print(f"[{tag}] device={device}  emb_dim={emb_dim}  epochs={epochs}  "
           f"alpha={alpha}  augment={augment}")
 
-    # ── data ──
     train_loader, val_loader = get_ae_loaders(cfg, augment=augment)
     print(f"Train batches: {len(train_loader)} | Val batches: {len(val_loader)}")
 
-    # ── model ──
     freeze = cfg["model"]["freeze_backbone"]
     model  = AutoEncoder(emb_dim=emb_dim, pretrained=True,
                          freeze_backbone=freeze,
@@ -118,7 +112,6 @@ def main():
     optimizer = torch.optim.Adam(param_groups)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
-    # ── output paths ──
     ckpt_dir = Path(cfg["ae_training"]["checkpoint_dir"]) / tag
     log_dir  = Path("reports") / f"exp_{tag}"
     ckpt_dir.mkdir(parents=True, exist_ok=True)

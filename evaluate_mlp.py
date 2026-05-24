@@ -1,5 +1,5 @@
 """
-evaluate_mlp.py — Evaluate a trained MLP on the test-set embeddings.
+evaluate_mlp.py -- Evaluate a trained MLP on the test-set embeddings.
 
 Usage:
     python evaluate_mlp.py --emb 512
@@ -15,7 +15,6 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 import numpy as np
 import pandas as pd
 import torch
@@ -25,8 +24,6 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from models import MLPClassifier
 
-
-# ── helpers ──────────────────────────────────────────────────────────────────
 
 def load_emb(emb_dir: Path, split: str, tag: str):
     X = np.load(emb_dir / f"{split}_{tag}.npy").astype(np.float32)
@@ -73,7 +70,7 @@ def evaluate_one(tag: str, cfg: dict, device) -> dict:
     top5 = np.mean(all_top5) * 100
     print(f"[mlp_{tag}]  Top-1: {top1:.2f}%   Top-5: {top5:.2f}%")
 
-    # ── per-class accuracy ──
+    # per-class accuracy
     n_cls = cfg["dataset"]["num_classes"]
     class_correct = np.zeros(n_cls)
     class_total   = np.zeros(n_cls)
@@ -97,7 +94,7 @@ def evaluate_one(tag: str, cfg: dict, device) -> dict:
     results_dir.mkdir(parents=True, exist_ok=True)
     per_class.to_csv(results_dir / "per_class_accuracy.csv", index=False)
 
-    # ── confusion matrix (25 most-confused) ──
+    # confusion matrix (25 most-confused)
     cm = sk_cm(all_labels, all_preds, labels=list(range(n_cls)))
     off = cm.copy(); np.fill_diagonal(off, 0)
     idx25 = np.argsort(off.sum(axis=1))[-25:][::-1]
@@ -107,12 +104,11 @@ def evaluate_one(tag: str, cfg: dict, device) -> dict:
     im = ax.imshow(cm[np.ix_(idx25, idx25)], aspect="auto", cmap="Blues")
     ax.set_xticks(range(25)); ax.set_xticklabels(sub_names, rotation=90, fontsize=7)
     ax.set_yticks(range(25)); ax.set_yticklabels(sub_names, fontsize=7)
-    ax.set_title(f"Confusion Matrix (25 most-confused) — mlp_{tag}", fontsize=11)
+    ax.set_title(f"Confusion Matrix (25 most-confused) -- mlp_{tag}", fontsize=11)
     plt.colorbar(im, ax=ax, shrink=0.7); plt.tight_layout()
     fig.savefig(results_dir / "confusion_matrix.png", dpi=120)
     plt.close(fig)
 
-    # ── summary ──
     with open(results_dir / "eval_summary.txt", "w") as f:
         f.write(f"Embedding: {tag}\n")
         f.write(f"Embedding dim: {in_dim}\n")
@@ -135,7 +131,7 @@ def write_comparison(results: list[dict], cfg: dict):
     by_tag = {r["tag"]: r for r in results}
 
     lines = [
-        "# Encoder-Decoder Embedding Comparison — CUB-200",
+        "# Encoder-Decoder Embedding Comparison -- CUB-200",
         "",
         "Joint loss: alpha*MSE + (1-alpha)*CrossEntropy  |  "
         "MLP classifier trained on frozen embeddings for 30 epochs.",
@@ -150,12 +146,11 @@ def write_comparison(results: list[dict], cfg: dict):
         if tag not in by_tag:
             continue
         r   = by_tag[tag]
-        aug = "No" if tag.endswith("_noaug") else ("—" if tag == "pca" else "Yes")
+        aug = "No" if tag.endswith("_noaug") else ("--" if tag == "pca" else "Yes")
         lines.append(f"| {tag:<14} | {aug:<9} | {r['in_dim']:>3} | "
                      f"{r['top1']:>9.2f} | {r['top5']:>9.2f} | {r['epoch']:>10} |")
 
-    # Aug vs noaug delta table
-    lines += ["", "## Augmentation Effect (aug − noaug)","",
+    lines += ["", "## Augmentation Effect (aug - noaug)", "",
               "| Dim | Delta Top-1 | Delta Top-5 |",
               "|-----|-------------|-------------|"]
     for dim in ["512", "256"]:
@@ -179,8 +174,6 @@ def write_comparison(results: list[dict], cfg: dict):
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"\nComparison report: {out}")
 
-
-# ── main ─────────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser()

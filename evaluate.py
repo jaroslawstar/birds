@@ -1,5 +1,5 @@
 """
-evaluate.py — Loads best checkpoint, evaluates on the official CUB-200 test set.
+evaluate.py -- Loads best checkpoint, evaluates on the official CUB-200 test set.
 
 Usage:
     python evaluate.py
@@ -17,16 +17,11 @@ import numpy as np
 import pandas as pd
 import torch
 import yaml
-from torchvision.utils import make_grid
 from tqdm import tqdm
 
 from data import get_loaders
-from data.dataset import CUBDataset
-from data.transforms import get_transforms
 from models import build_model
 
-
-# ── helpers ──────────────────────────────────────────────────────────────────
 
 def topk_accuracy(outputs, labels, k):
     _, pred = outputs.topk(k, dim=1, largest=True, sorted=True)
@@ -41,8 +36,6 @@ def denormalize(tensor, mean, std):
         t[c] = t[c] * s + m
     return t.clamp(0, 1)
 
-
-# ── main ─────────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser()
@@ -65,21 +58,17 @@ def main():
     ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
     print(f"Loaded checkpoint from epoch {ckpt['epoch']} (val_acc={ckpt['val_acc']:.2f}%)")
 
-    model = build_model(cfg, technique).to(device)
+    model = build_model(cfg).to(device)
     model.load_state_dict(ckpt["state_dict"])
     model.eval()
 
-    # ── test loader ──
     _, _, test_loader = get_loaders(cfg)
 
-    # ── forward pass ──
-    all_top1 = []
-    all_top5 = []
+    all_top1   = []
+    all_top5   = []
     all_labels = []
     all_preds  = []
-    all_probs  = []
 
-    # Store raw images + metadata for sample grid
     sample_images = []
     sample_meta   = []   # (label, pred, correct)
 
@@ -87,7 +76,6 @@ def main():
         for images, labels in tqdm(test_loader, desc="eval"):
             images, labels = images.to(device), labels.to(device)
             outputs = model(images)
-            probs   = torch.softmax(outputs, dim=1)
 
             top1_correct = topk_accuracy(outputs, labels, 1)
             top5_correct = topk_accuracy(outputs, labels, 5)
@@ -97,11 +85,9 @@ def main():
             all_top5.extend(top5_correct.cpu().tolist())
             all_labels.extend(labels.cpu().tolist())
             all_preds.extend(preds.cpu().tolist())
-            all_probs.append(probs.cpu())
 
-            # Collect samples for the visual grid
             for i in range(images.size(0)):
-                if len(sample_images) < 200:   # collect first 200, subsample later
+                if len(sample_images) < 200:
                     sample_images.append(images[i].cpu())
                     sample_meta.append((labels[i].item(), preds[i].item(),
                                         top1_correct[i].item()))
@@ -111,7 +97,7 @@ def main():
     print(f"\nTest Top-1 Accuracy: {top1_acc:.2f}%")
     print(f"Test Top-5 Accuracy: {top5_acc:.2f}%")
 
-    # ── per-class accuracy ──
+    # per-class accuracy
     num_classes = cfg["dataset"]["num_classes"]
     class_correct = np.zeros(num_classes)
     class_total   = np.zeros(num_classes)
@@ -119,7 +105,6 @@ def main():
         class_total[label]   += 1
         class_correct[label] += int(label == pred)
 
-    # Load class names
     classes_df = pd.read_csv(
         Path(cfg["dataset"]["root"]) / "classes.txt",
         sep=" ", header=None, names=["class_id", "class_name"]
@@ -138,13 +123,10 @@ def main():
     per_class_acc.to_csv(per_class_csv, index=False)
     print(f"Per-class accuracy saved to {per_class_csv}")
 
-    # ── confusion matrix (top-25 most confused classes) ──
-    # Full 200×200 matrix would be too dense; show top-25 by error rate
+    # confusion matrix (top-25 most confused classes)
     from sklearn.metrics import confusion_matrix as sk_cm
 
     cm = sk_cm(all_labels, all_preds, labels=list(range(num_classes)))
-
-    # Pick 25 classes with highest off-diagonal mass
     off_diag = cm.copy()
     np.fill_diagonal(off_diag, 0)
     top25_idx = np.argsort(off_diag.sum(axis=1))[-25:][::-1]
@@ -156,7 +138,7 @@ def main():
     im = ax.imshow(cm_sub, aspect="auto", cmap="Blues")
     ax.set_xticks(range(25)); ax.set_xticklabels(sub_names, rotation=90, fontsize=7)
     ax.set_yticks(range(25)); ax.set_yticklabels(sub_names, fontsize=7)
-    ax.set_title("Confusion Matrix — 25 most-confused classes", fontsize=11)
+    ax.set_title("Confusion Matrix -- 25 most-confused classes", fontsize=11)
     plt.colorbar(im, ax=ax, shrink=0.7)
     plt.tight_layout()
     cm_path = results_dir / "confusion_matrix.png"
@@ -164,7 +146,7 @@ def main():
     plt.close(fig)
     print(f"Confusion matrix saved to {cm_path}")
 
-    # ── sample prediction grid (8 correct + 8 incorrect) ──
+    # sample prediction grid (8 correct + 8 incorrect)
     mean = cfg["preprocessing"]["imagenet_mean"]
     std  = cfg["preprocessing"]["imagenet_std"]
 
@@ -200,14 +182,14 @@ def main():
     plt.close(fig)
     print(f"Sample predictions saved to {grid_path}")
 
-    # ── summary ──
+    # summary
     summary_path = results_dir / "eval_summary.txt"
     with open(summary_path, "w") as f:
         f.write(f"Technique: baseline\n")
         f.write(f"Top-1 Accuracy: {top1_acc:.2f}%\n")
         f.write(f"Top-5 Accuracy: {top5_acc:.2f}%\n")
         f.write(f"Checkpoint epoch: {ckpt['epoch']}\n")
-    print(f"\nSummary written to {summary_path}")
+    print(f"Summary written to {summary_path}")
 
     return top1_acc, top5_acc
 

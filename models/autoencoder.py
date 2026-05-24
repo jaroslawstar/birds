@@ -5,7 +5,7 @@ from torchvision import models
 
 class Encoder(nn.Module):
     """
-    ResNet-50 backbone (fine-tuned) + 2-layer projection head → emb_dim.
+    ResNet-50 backbone (frozen) + 2-layer projection head -> emb_dim.
 
     get_raw_features() returns the 2048-d avgpool output before projection;
     used for PCA embedding extraction.
@@ -15,7 +15,7 @@ class Encoder(nn.Module):
         super().__init__()
         weights = models.ResNet50_Weights.IMAGENET1K_V1 if pretrained else None
         backbone = models.resnet50(weights=weights)
-        # Drop the final FC; keep conv layers + avgpool → (B, 2048, 1, 1)
+        # Drop the final FC; keep conv layers + avgpool -> (B, 2048, 1, 1)
         self.backbone = nn.Sequential(*list(backbone.children())[:-1])
         if freeze_backbone:
             for p in self.backbone.parameters():
@@ -38,9 +38,9 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
     """
-    Transposed-convolution decoder: emb_dim → 3×224×224.
+    Transposed-convolution decoder: emb_dim -> 3x224x224.
 
-    Upsampling path: 7 → 14 → 28 → 56 → 112 → 224
+    Upsampling path: 7 -> 14 -> 28 -> 56 -> 112 -> 224
     Each ConvTranspose2d(kernel=4, stride=2, padding=1) doubles spatial size.
     """
 
@@ -48,19 +48,19 @@ class Decoder(nn.Module):
         super().__init__()
         self.fc = nn.Linear(emb_dim, 512 * 7 * 7)
         self.net = nn.Sequential(
-            # (B, 512, 7,   7)  → (B, 256, 14,  14)
+            # (B, 512, 7,  7) -> (B, 256, 14, 14)
             nn.ConvTranspose2d(512, 256, 4, 2, 1, bias=False),
             nn.BatchNorm2d(256), nn.ReLU(inplace=True),
-            # (B, 256, 14,  14) → (B, 128, 28,  28)
+            # (B, 256, 14, 14) -> (B, 128, 28, 28)
             nn.ConvTranspose2d(256, 128, 4, 2, 1, bias=False),
             nn.BatchNorm2d(128), nn.ReLU(inplace=True),
-            # (B, 128, 28,  28) → (B,  64, 56,  56)
+            # (B, 128, 28, 28) -> (B, 64, 56, 56)
             nn.ConvTranspose2d(128,  64, 4, 2, 1, bias=False),
             nn.BatchNorm2d(64),  nn.ReLU(inplace=True),
-            # (B,  64, 56,  56) → (B,  32, 112, 112)
+            # (B, 64, 56, 56) -> (B, 32, 112, 112)
             nn.ConvTranspose2d( 64,  32, 4, 2, 1, bias=False),
             nn.BatchNorm2d(32),  nn.ReLU(inplace=True),
-            # (B,  32, 112, 112) → (B,   3, 224, 224)
+            # (B, 32, 112, 112) -> (B, 3, 224, 224)
             nn.ConvTranspose2d( 32,   3, 4, 2, 1),
             # No activation: MSE loss in normalized pixel space (unbounded)
         )
@@ -89,9 +89,9 @@ class AutoEncoder(nn.Module):
         self.emb_dim    = emb_dim
 
     def forward(self, x: torch.Tensor):
-        emb     = self.encoder(x)
-        recon   = self.decoder(emb)
-        logits  = self.classifier(emb) if self.classifier is not None else None
+        emb    = self.encoder(x)
+        recon  = self.decoder(emb)
+        logits = self.classifier(emb) if self.classifier is not None else None
         return recon, emb, logits
 
     def encode(self, x: torch.Tensor) -> torch.Tensor:
@@ -106,7 +106,7 @@ def get_ae_param_groups(model: AutoEncoder,
                         lr_head: float,
                         weight_decay: float):
     """
-    Returns optimiser param groups.  When backbone is frozen only the
+    Returns optimizer param groups. When backbone is frozen only the
     projection head and decoder params (requires_grad=True) are returned.
     When unfrozen, backbone gets lr_backbone and the rest get lr_head.
     """

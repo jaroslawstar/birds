@@ -1,5 +1,5 @@
 """
-extract_embeddings.py — Extract and save embeddings for all three methods.
+extract_embeddings.py -- Extract and save embeddings for all methods.
 
 Produces (under embeddings/):
   {split}_labels.npy          labels for train / val / test (shared)
@@ -26,13 +26,11 @@ from data import get_embed_loaders
 from models import AutoEncoder
 
 
-# ── helpers ──────────────────────────────────────────────────────────────────
-
 @torch.no_grad()
 def extract(model: AutoEncoder, loader, device, mode: str) -> np.ndarray:
     """
-    mode: 'projected'  → emb_dim-d learned embedding
-          'raw'        → 2048-d backbone features (for PCA)
+    mode: 'projected'  -> emb_dim-d learned embedding
+          'raw'        -> 2048-d backbone features (for PCA)
     """
     model.eval()
     vecs, labs = [], []
@@ -63,8 +61,6 @@ def load_ae(cfg, dim: int, device, suffix: str = ""):
     return model
 
 
-# ── main ─────────────────────────────────────────────────────────────────────
-
 def main():
     with open("configs/config.yaml") as f:
         cfg = yaml.safe_load(f)
@@ -80,7 +76,7 @@ def main():
     train_loader, val_loader, test_loader = get_embed_loaders(cfg)
     loaders = {"train": train_loader, "val": val_loader, "test": test_loader}
 
-    # ── aug and noaug learned embeddings for each dim ──
+    # aug and noaug learned embeddings for each dim
     for dim in cfg["ae_training"]["emb_dims"]:
         for suffix in ["", "_noaug"]:
             ckpt_tag  = f"ae_{dim}{suffix}"
@@ -99,7 +95,7 @@ def main():
                     np.save(lab_path, labs)
             print(f"  Saved {emb_tag} embeddings to {emb_dir}/")
 
-    # ── 2048-d raw features for PCA (frozen backbone; aug/noaug gives identical features) ──
+    # 2048-d raw features for PCA (frozen backbone; aug/noaug gives identical features)
     src_dim = cfg["pca"]["source_dim"]
     print(f"\n=== Extracting 2048-d raw features for PCA (from ae_{src_dim}) ===")
     model = load_ae(cfg, src_dim, device, suffix="")
@@ -109,7 +105,7 @@ def main():
         raw[split] = vecs
     print(f"  Raw feature shape: {raw['train'].shape}")
 
-    # ── Fit PCA on training set ──
+    # Fit PCA on training set
     from sklearn.decomposition import PCA
     from sklearn.preprocessing import StandardScaler
 
@@ -123,7 +119,6 @@ def main():
     explained    = pca.explained_variance_ratio_.sum()
     print(f"  PCA: {n_components} components explain {explained*100:.2f}% variance")
 
-    # Save PCA model + scaler together
     pca_bundle = {"pca": pca, "scaler": scaler}
     with open(emb_dir / "pca_model.pkl", "wb") as f:
         pickle.dump(pca_bundle, f)
@@ -134,7 +129,6 @@ def main():
         f.write(f"source_encoder: ae_{src_dim}\n")
         f.write(f"variance_threshold: {cfg['pca']['variance_threshold']}\n")
 
-    # Transform all splits
     for split in splits:
         X_scaled = scaler.transform(raw[split])
         X_pca    = pca.transform(X_scaled)
