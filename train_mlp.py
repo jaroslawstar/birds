@@ -23,7 +23,7 @@ from tqdm import tqdm
 from models import MLPClassifier
 
 
-# ── helpers ──────────────────────────────────────────────────────────────────
+# helpers
 
 def load_split(emb_dir: Path, split: str, tag: str):
     X = np.load(emb_dir / f"{split}_{tag}.npy").astype(np.float32)
@@ -58,7 +58,7 @@ def run_epoch(model, loader, criterion, optimizer, device, train: bool):
     return total_loss / total_n, total_correct / total_n * 100
 
 
-# ── main ─────────────────────────────────────────────────────────────────────
+# main
 
 def main():
     parser = argparse.ArgumentParser()
@@ -78,7 +78,7 @@ def main():
     device   = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"[mlp_{tag}] device={device}")
 
-    # ── load embeddings ──
+    # load embeddings
     X_train, y_train = load_split(emb_dir, "train", tag)
     X_val,   y_val   = load_split(emb_dir, "val",   tag)
     in_dim = X_train.shape[1]
@@ -88,7 +88,7 @@ def main():
     train_loader = make_loader(X_train, y_train, batch_size, shuffle=True)
     val_loader   = make_loader(X_val,   y_val,   batch_size, shuffle=False)
 
-    # ── model ──
+    # model
     model = MLPClassifier(
         in_dim=in_dim,
         num_classes=n_cls,
@@ -104,7 +104,7 @@ def main():
     )
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
-    # ── output paths ──
+    # output paths
     ckpt_dir = Path(mlp_cfg["checkpoint_dir"]) / f"mlp_{tag}"
     log_dir  = Path(mlp_cfg["log_dir"]) / f"exp_mlp_{tag}"
     ckpt_dir.mkdir(parents=True, exist_ok=True)

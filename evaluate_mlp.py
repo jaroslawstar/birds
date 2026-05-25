@@ -1,5 +1,5 @@
 """
-evaluate_mlp.py — Evaluate a trained MLP on the test-set embeddings.
+evaluate_mlp.py -- Evaluate a trained MLP on the test-set embeddings.
 
 Usage:
     python evaluate_mlp.py --emb 512
@@ -15,7 +15,6 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 import numpy as np
 import pandas as pd
 import torch
@@ -25,8 +24,6 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from models import MLPClassifier
 
-
-# ── helpers ──────────────────────────────────────────────────────────────────
 
 def load_emb(emb_dir: Path, split: str, tag: str):
     X = np.load(emb_dir / f"{split}_{tag}.npy").astype(np.float32)
@@ -73,7 +70,7 @@ def evaluate_one(tag: str, cfg: dict, device) -> dict:
     top5 = np.mean(all_top5) * 100
     print(f"[mlp_{tag}]  Top-1: {top1:.2f}%   Top-5: {top5:.2f}%")
 
-    # ── per-class accuracy ──
+    # per-class accuracy
     n_cls = cfg["dataset"]["num_classes"]
     class_correct = np.zeros(n_cls)
     class_total   = np.zeros(n_cls)
@@ -97,7 +94,7 @@ def evaluate_one(tag: str, cfg: dict, device) -> dict:
     results_dir.mkdir(parents=True, exist_ok=True)
     per_class.to_csv(results_dir / "per_class_accuracy.csv", index=False)
 
-    # ── confusion matrix (25 most-confused) ──
+    # confusion matrix (25 most-confused)
     cm = sk_cm(all_labels, all_preds, labels=list(range(n_cls)))
     off = cm.copy(); np.fill_diagonal(off, 0)
     idx25 = np.argsort(off.sum(axis=1))[-25:][::-1]
@@ -107,12 +104,11 @@ def evaluate_one(tag: str, cfg: dict, device) -> dict:
     im = ax.imshow(cm[np.ix_(idx25, idx25)], aspect="auto", cmap="Blues")
     ax.set_xticks(range(25)); ax.set_xticklabels(sub_names, rotation=90, fontsize=7)
     ax.set_yticks(range(25)); ax.set_yticklabels(sub_names, fontsize=7)
-    ax.set_title(f"Confusion Matrix (25 most-confused) — mlp_{tag}", fontsize=11)
+    ax.set_title(f"Confusion Matrix (25 most-confused) -- mlp_{tag}", fontsize=11)
     plt.colorbar(im, ax=ax, shrink=0.7); plt.tight_layout()
     fig.savefig(results_dir / "confusion_matrix.png", dpi=120)
     plt.close(fig)
 
-    # ── summary ──
     with open(results_dir / "eval_summary.txt", "w") as f:
         f.write(f"Embedding: {tag}\n")
         f.write(f"Embedding dim: {in_dim}\n")
@@ -125,39 +121,44 @@ def evaluate_one(tag: str, cfg: dict, device) -> dict:
 
 
 def write_comparison(results: list[dict], cfg: dict):
-    """Write reports/ae_comparison.md comparing all three MLP variants."""
+    """Write reports/ae_comparison.md with aug vs noaug comparison."""
     emb_dir = Path(cfg["embeddings_dir"])
-    pca_info_path = emb_dir / "pca_info.txt"
     pca_note = ""
+    pca_info_path = emb_dir / "pca_info.txt"
     if pca_info_path.exists():
         pca_note = pca_info_path.read_text()
 
+    by_tag = {r["tag"]: r for r in results}
+
     lines = [
-        "# Encoder-Decoder Embedding Comparison — CUB-200",
+        "# Encoder-Decoder Embedding Comparison -- CUB-200",
         "",
-        "Architecture: ResNet-50 (fine-tuned) → projection head → decoder (denoising AE).",
+        "Joint loss: alpha*MSE + (1-alpha)*CrossEntropy  |  "
         "MLP classifier trained on frozen embeddings for 30 epochs.",
         "",
         "## Results",
         "",
-        "| Embedding | Dim | Top-1 (%) | Top-5 (%) | Best Epoch |",
-        "|-----------|-----|-----------|-----------|------------|",
+        "| Embedding      | Augmented | Dim | Top-1 (%) | Top-5 (%) | Best Epoch |",
+        "|----------------|-----------|-----|-----------|-----------|------------|",
     ]
-    for r in results:
-        lines.append(f"| {r['tag']:<9} | {r['in_dim']:>3} | "
-                     f"{r['top1']:>9.2f} | {r['top5']:>9.2f} | "
-                     f"{r['epoch']:>10} |")
+    order = ["512", "512_noaug", "256", "256_noaug", "pca"]
+    for tag in order:
+        if tag not in by_tag:
+            continue
+        r   = by_tag[tag]
+        aug = "No" if tag.endswith("_noaug") else ("--" if tag == "pca" else "Yes")
+        lines.append(f"| {tag:<14} | {aug:<9} | {r['in_dim']:>3} | "
+                     f"{r['top1']:>9.2f} | {r['top5']:>9.2f} | {r['epoch']:>10} |")
 
-    if len(results) > 1:
-        lines += ["", "## Delta vs 512-d baseline"]
-        base = next((r for r in results if r["tag"] == "512"), None)
-        if base:
-            lines += ["", "| Embedding | Delta Top-1 | Delta Top-5 |",
-                         "|-----------|-------------|-------------|"]
-            for r in results:
-                if r["tag"] != "512":
-                    lines.append(f"| {r['tag']:<9} | {r['top1']-base['top1']:+.2f}        "
-                                  f"| {r['top5']-base['top5']:+.2f}        |")
+    lines += ["", "## Augmentation Effect (aug - noaug)", "",
+              "| Dim | Delta Top-1 | Delta Top-5 |",
+              "|-----|-------------|-------------|"]
+    for dim in ["512", "256"]:
+        aug_r   = by_tag.get(dim)
+        noaug_r = by_tag.get(f"{dim}_noaug")
+        if aug_r and noaug_r:
+            lines.append(f"| {dim} | {aug_r['top1']-noaug_r['top1']:+.2f}        "
+                         f"| {aug_r['top5']-noaug_r['top5']:+.2f}        |")
 
     if pca_note:
         lines += ["", "## PCA Details", "", "```", pca_note.strip(), "```"]
@@ -166,16 +167,13 @@ def write_comparison(results: list[dict], cfg: dict):
         "", "## Per-experiment artifacts",
         "",
         "Each variant writes to `reports/exp_mlp_<tag>/`:",
-        "- `train_log.csv`, `per_class_accuracy.csv`, `confusion_matrix.png`, "
-          "`eval_summary.txt`",
+        "- `train_log.csv`, `per_class_accuracy.csv`, `confusion_matrix.png`, `eval_summary.txt`",
     ]
 
     out = Path("reports/ae_comparison.md")
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"\nComparison report: {out}")
 
-
-# ── main ─────────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser()
@@ -188,7 +186,8 @@ def main():
         cfg = yaml.safe_load(f)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tags   = ["512", "256", "pca"] if args.all else [args.emb]
+    all_tags = ["512", "256", "pca", "512_noaug", "256_noaug"]
+    tags     = all_tags if args.all else [args.emb]
 
     results = [evaluate_one(tag, cfg, device) for tag in tags]
     if args.all:

@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 from torchvision import models
 
@@ -15,12 +14,12 @@ def build_model(cfg):
     weights = models.ResNet50_Weights.IMAGENET1K_V1
     model   = models.resnet50(weights=weights)
 
-    # ── freeze backbone (linear-probe mode) ──
+    # freeze backbone (linear-probe mode)
     if freeze:
         for param in model.parameters():
             param.requires_grad = False
 
-    # ── replace head: 2048 → num_classes ──
+    # replace head: 2048 -> num_classes
     in_features = model.fc.in_features
     model.fc = nn.Linear(in_features, num_classes)
     for param in model.fc.parameters():

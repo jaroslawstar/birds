@@ -1,5 +1,5 @@
 """
-train.py — CUB-200 linear-probe training loop (ResNet-50 frozen backbone).
+train.py -- CUB-200 linear-probe training loop (ResNet-50 frozen backbone).
 
 Usage:
     python train.py
@@ -20,23 +20,6 @@ from tqdm import tqdm
 from data import get_loaders
 from models import build_model
 from models.backbone import get_trainable_params
-
-
-# ── helpers ──────────────────────────────────────────────────────────────────
-
-def accuracy(outputs, labels, topk=(1,)):
-    """Returns top-k accuracy values as percentages."""
-    with torch.no_grad():
-        maxk = max(topk)
-        batch_size = labels.size(0)
-        _, pred = outputs.topk(maxk, dim=1, largest=True, sorted=True)
-        pred = pred.t()
-        correct = pred.eq(labels.view(1, -1).expand_as(pred))
-        results = []
-        for k in topk:
-            correct_k = correct[:k].reshape(-1).float().sum()
-            results.append((correct_k / batch_size * 100).item())
-        return results
 
 
 def run_epoch(model, loader, criterion, optimizer, device, train: bool):
@@ -68,8 +51,6 @@ def run_epoch(model, loader, criterion, optimizer, device, train: bool):
     return avg_loss, avg_acc
 
 
-# ── main ─────────────────────────────────────────────────────────────────────
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/config.yaml")
@@ -87,26 +68,21 @@ def main():
     elif args.epochs is not None:
         cfg["training"]["epochs"] = args.epochs
 
-    # ── per-experiment output paths ──
     cfg["training"]["checkpoint_dir"] = "checkpoints/baseline"
     cfg["training"]["log_csv"]        = "reports/exp_baseline/train_log.csv"
 
-    # ── device ──
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
     if device.type == "cpu" and cfg["training"]["epochs"] == 10:
         cfg["training"]["epochs"] = 5
-        print("  No CUDA — reducing default epochs to 5 for CPU run.")
+        print("  No CUDA - reducing default epochs to 5 for CPU run.")
 
-    # ── data ──
-    # Reduce num_workers on Windows to avoid multiprocessing issues
     if os.name == "nt":
         cfg["training"]["num_workers"] = 0
 
     train_loader, val_loader, _ = get_loaders(cfg)
     print(f"Train batches: {len(train_loader)} | Val batches: {len(val_loader)}")
 
-    # ── model ──
     model = build_model(cfg).to(device)
     n_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
     n_total     = sum(p.numel() for p in model.parameters())
@@ -121,7 +97,6 @@ def main():
     epochs = cfg["training"]["epochs"]
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
-    # ── logging ──
     log_path = Path(cfg["training"]["log_csv"])
     log_path.parent.mkdir(parents=True, exist_ok=True)
     ckpt_dir = Path(cfg["training"]["checkpoint_dir"])

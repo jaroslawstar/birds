@@ -40,6 +40,7 @@ ae_training:
   weight_decay: 1.0e-4
   batch_size: 32
   noise_std: 0.05               # Gaussian noise σ added to input
+  alpha: 0.5                    # joint loss weight: alpha*MSE + (1-alpha)*CE
   num_workers: 4
   checkpoint_dir: checkpoints   # saves as checkpoints/ae_<dim>/best.pt
 

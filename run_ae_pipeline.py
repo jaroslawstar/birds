@@ -1,11 +1,11 @@
 """
-run_ae_pipeline.py — End-to-end orchestrator for the encoder-decoder pipeline.
+run_ae_pipeline.py -- End-to-end orchestrator for the encoder-decoder pipeline.
 
-Stages (all sequential — AE fine-tunes the full backbone so parallel runs
+Stages (all sequential -- AE fine-tunes the full backbone so parallel runs
 would compete for the same GPU memory):
   1. Train AE dim=512   (~60-90 min on GPU)
   2. Train AE dim=256   (~60-90 min on GPU)
-  3. Extract embeddings — 512-d, 256-d, PCA   (~5 min)
+  3. Extract embeddings -- 512-d, 256-d, PCA   (~5 min)
   4. Train MLP on 512-d, 256-d, PCA in parallel   (~2-5 min each)
   5. Evaluate all three MLPs + write ae_comparison.md
 
@@ -20,7 +20,6 @@ import argparse
 import subprocess
 import sys
 import time
-import threading
 from pathlib import Path
 
 
@@ -32,7 +31,6 @@ def run(cmd: list, label: str, log_path: Path = None):
         log_path.parent.mkdir(parents=True, exist_ok=True)
         with open(log_path, "w") as lf:
             proc = subprocess.run(cmd, stdout=lf, stderr=lf)
-        # Stream last few lines to console so user sees progress
         lines = log_path.read_text(errors="replace").splitlines()
         for line in lines[-5:]:
             print(f"  {line}")
@@ -84,31 +82,41 @@ def main():
 
     py = sys.executable
 
-    # ── Stage 1 & 2: Train AE (sequential — GPU memory) ──
+    # Stage 1 & 2: Train AE with augmentation (sequential -- GPU memory)
     if not args.skip_ae:
         for dim in [512, 256]:
             cmd = [py, "train_ae.py", "--dim", str(dim)]
             if args.smoke_test:
                 cmd.append("--smoke-test")
             run(cmd,
-                label=f"AE training  dim={dim}",
+                label=f"AE training  dim={dim}  aug",
                 log_path=Path(f"reports/exp_ae_{dim}/run_train.log"))
 
-    # ── Stage 3: Extract embeddings ──
+        # Stage 2b: Train AE without augmentation (for comparison)
+        for dim in [512, 256]:
+            cmd = [py, "train_ae.py", "--dim", str(dim), "--no-aug"]
+            if args.smoke_test:
+                cmd.append("--smoke-test")
+            run(cmd,
+                label=f"AE training  dim={dim}  noaug",
+                log_path=Path(f"reports/exp_ae_{dim}_noaug/run_train.log"))
+
+    # Stage 3: Extract embeddings
     if not args.skip_emb:
         run([py, "extract_embeddings.py"],
-            label="Extract embeddings (512, 256, PCA)",
+            label="Extract embeddings (512, 256, noaug variants, PCA)",
             log_path=Path("reports/extract_embeddings.log"))
 
-    # ── Stage 4: Train MLPs in parallel (CPU-bound, no GPU contention) ──
+    # Stage 4: Train MLPs in parallel
+    all_tags = ["512", "256", "pca", "512_noaug", "256_noaug"]
     print("\n=== Training MLPs in parallel ===")
     run_parallel(
         [([py, "train_mlp.py", "--emb", tag], f"MLP {tag}")
-         for tag in ["512", "256", "pca"]],
+         for tag in all_tags],
         log_dir=Path("reports"),
     )
 
-    # ── Stage 5: Evaluate all + comparison report ──
+    # Stage 5: Evaluate all + comparison report
     run([py, "evaluate_mlp.py", "--all"],
         label="Evaluate all MLPs + write ae_comparison.md",
         log_path=Path("reports/evaluate_mlp.log"))

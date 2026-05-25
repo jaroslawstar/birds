@@ -1,12 +1,10 @@
 import torch
-import torch.nn.functional as F
-import numpy as np
-from PIL import Image, ImageFilter
 import torchvision.transforms.functional as TF
+from PIL import Image
 from torchvision import transforms
 
 
-# ── Standard classification transforms ───────────────────────────────────────
+# --- Standard classification transforms
 
 def get_transforms(cfg, split: str):
     """Standard single-image transforms for classification."""
@@ -33,21 +31,21 @@ def get_transforms(cfg, split: str):
         ])
 
 
-# ── Denoising Autoencoder paired transforms ───────────────────────────────────
+# --- Denoising Autoencoder paired transforms
 
 class AETransformPair:
     """
     Produces (noisy_input, clean_target) pairs for denoising AE training.
 
     Pipeline:
-      1. Geometric transforms (resize, crop, flip, rotation) applied ONCE —
+      1. Geometric transforms (resize, crop, flip, rotation) applied ONCE --
          the same result becomes the clean target.
       2. ColorJitter + Gaussian noise applied ONLY to the input copy.
 
     For val/test (split != 'train'): deterministic center crop, same noise.
     """
 
-    def __init__(self, cfg, split: str):
+    def __init__(self, cfg, split: str, augment: bool = True):
         ae_aug  = cfg["ae_augmentation"]
         pre     = cfg["preprocessing"]
         self.mean      = pre["imagenet_mean"]
@@ -56,6 +54,7 @@ class AETransformPair:
         self.crop_size = pre["crop_size"]
         self.noise_std = cfg["ae_training"]["noise_std"]
         self.split     = split
+        self.augment   = augment
 
         self.jitter = transforms.ColorJitter(
             brightness=ae_aug["jitter_brightness"],
@@ -70,33 +69,34 @@ class AETransformPair:
         return self._normalize(TF.to_tensor(img))
 
     def __call__(self, img: Image.Image):
-        # ── Step 1: shared geometric transforms ──
+        # Step 1: shared geometric transforms
         img = TF.resize(img, self.resize)
 
         if self.split == "train":
-            # Random crop
             i, j, h, w = transforms.RandomCrop.get_params(
                 img, (self.crop_size, self.crop_size))
             img = TF.crop(img, i, j, h, w)
-            # Random horizontal flip
             if torch.rand(1).item() < 0.5:
                 img = TF.hflip(img)
-            # Random rotation
             angle = (torch.rand(1).item() * 2 - 1) * self.rot_deg
             img = TF.rotate(img, angle)
         else:
             img = TF.center_crop(img, self.crop_size)
 
-        # ── Step 2: clean target (no corruption) ──
+        # Step 2: clean target (no corruption)
         clean = self._to_tensor_normalized(img)
 
-        # ── Step 3: noisy input (ColorJitter + Gaussian noise) ──
-        noisy_pil = self.jitter(img) if self.split == "train" else img
+        # Step 3: noisy input (ColorJitter + Gaussian noise)
+        if self.augment and self.split == "train":
+            noisy_pil = self.jitter(img)
+        else:
+            noisy_pil = img
         noisy = self._to_tensor_normalized(noisy_pil)
-        noisy = noisy + torch.randn_like(noisy) * self.noise_std
+        if self.augment:
+            noisy = noisy + torch.randn_like(noisy) * self.noise_std
 
         return noisy, clean
 
 
-def get_ae_transforms(cfg, split: str) -> AETransformPair:
-    return AETransformPair(cfg, split)
+def get_ae_transforms(cfg, split: str, augment: bool = True) -> AETransformPair:
+    return AETransformPair(cfg, split, augment=augment)
